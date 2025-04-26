@@ -7,14 +7,14 @@ import {
   signOut
 } from 'firebase/auth';
 
-// Firebase configuration object - values come from environment variables
+// Firebase configuration object with direct values for integration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyD1E0GMrlFP1-NVV2oXcdMLyAxJ-cYugXQ",
+  authDomain: "tailoriq-7c054.firebaseapp.com",
+  projectId: "tailoriq-7c054",
+  storageBucket: "tailoriq-7c054.firebasestorage.app",
+  messagingSenderId: "226015893902",
+  appId: "1:226015893902:web:384fc18bdc555db635ecdf"
 };
 
 // Initialize Firebase
