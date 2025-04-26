@@ -3,16 +3,15 @@ import puppeteer from "puppeteer";
 import { generateJakeGutTemplate } from "./jakeGutTemplate";
 
 // Function to generate a PDF from resume data and selected template
-export async function generatePDF(resumeData: Resume, template: ResumeTemplate): Promise<Buffer> {
+export async function generatePDF(resumeData: Resume, template: ResumeTemplate, settings: any = {}): Promise<Buffer> {
   let browser = null;
   try {
     // Generate the HTML for the resume
-    const htmlContent = generateResumeHTML(resumeData, template);
+    const htmlContent = generateResumeHTML(resumeData, template, settings);
 
-    // Launch Puppeteer in serverless mode with more robust options
+    // Launch Puppeteer with more flexible configuration
     browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/nix/store/mfmnxisc1x9xc4whxmn91w9s2zy8qm9l-chromium-113.0.5672.126/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -34,9 +33,8 @@ export async function generatePDF(resumeData: Resume, template: ResumeTemplate):
       timeout: 30000 
     });
 
-    // Generate the PDF with better formatting
-    const pdfData = await page.pdf({
-      format: 'Letter',
+    // Configure PDF options based on settings
+    const pdfOptions: any = {
       printBackground: true,
       margin: {
         top: '0.5in',
@@ -45,7 +43,17 @@ export async function generatePDF(resumeData: Resume, template: ResumeTemplate):
         left: '0.5in'
       },
       preferCSSPageSize: true
-    });
+    };
+    
+    // Set paper size from settings
+    if (settings.paperSize === 'letter' || !settings.paperSize) {
+      pdfOptions.format = 'Letter';
+    } else if (settings.paperSize === 'a4') {
+      pdfOptions.format = 'A4';
+    }
+    
+    // Generate the PDF
+    const pdfData = await page.pdf(pdfOptions);
     
     // Convert Uint8Array to Buffer
     const pdfBuffer = Buffer.from(pdfData);
@@ -66,26 +74,51 @@ export async function generatePDF(resumeData: Resume, template: ResumeTemplate):
   }
 }
 
-function generateResumeHTML(resumeData: Resume, template: ResumeTemplate): string {
-  // Common styles for all templates
+function generateResumeHTML(resumeData: Resume, template: ResumeTemplate, settings: any = {}): string {
+  // Function to get font family CSS
+  const getFontFamily = (fontFamily: string): string => {
+    switch (fontFamily) {
+      case 'times':
+        return "'Times New Roman', Times, serif";
+      case 'calibri':
+        return "Calibri, 'Segoe UI', sans-serif";
+      case 'arial':
+        return "Arial, Helvetica, sans-serif";
+      case 'garamond':
+        return "Garamond, Georgia, serif";
+      case 'helvetica':
+        return "Helvetica, Arial, sans-serif";
+      default:
+        return "'Times New Roman', Times, serif";
+    }
+  };
+
+  // Default settings if not provided
+  const fontSize = settings.fontSize || 11;
+  const fontFamily = settings.fontFamily || 'times';
+  const lineSpacing = settings.lineSpacing || 1.15;
+  const paperSize = settings.paperSize || 'letter';
+  
+  // Common styles for all templates with settings applied
   const commonStyles = `
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: ${getFontFamily(fontFamily)};
+      font-size: ${fontSize}pt;
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       color: #333;
-      line-height: 1.6;
+      line-height: ${lineSpacing};
     }
     .resume-page {
-      width: 8.5in;
-      height: 11in;
+      width: ${paperSize === 'letter' ? '8.5in' : '210mm'};
+      height: ${paperSize === 'letter' ? '11in' : '297mm'};
       padding: 0.6in;
       box-sizing: border-box;
       background-color: white;
     }
     @page {
-      size: letter portrait;
+      size: ${paperSize} portrait;
       margin: 0;
     }
   `;

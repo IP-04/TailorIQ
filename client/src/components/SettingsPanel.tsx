@@ -14,14 +14,24 @@ import { Save, RefreshCw } from "lucide-react";
 interface SettingsPanelProps {
   activeTemplate: ResumeTemplate;
   onTemplateChange: (template: ResumeTemplate) => void;
+  settings: {
+    fontSize: number;
+    fontFamily: string;
+    lineSpacing: number;
+    autoAdjust: boolean;
+    atsMode: boolean;
+    paperSize: string;
+    fileFormat: string;
+  };
+  onSettingsChange: (settings: any) => void;
 }
 
-export default function SettingsPanel({ activeTemplate, onTemplateChange }: SettingsPanelProps) {
-  const [fontSize, setFontSize] = useState(11);
-  const [fontFamily, setFontFamily] = useState("times");
-  const [lineSpacing, setLineSpacing] = useState(1.15);
-  const [autoAdjust, setAutoAdjust] = useState(true);
-  const [atsMode, setAtsMode] = useState(true);
+export default function SettingsPanel({ 
+  activeTemplate, 
+  onTemplateChange,
+  settings,
+  onSettingsChange
+}: SettingsPanelProps) {
   
   return (
     <div className="p-4">
@@ -50,7 +60,10 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="font-family">Font Family</Label>
-                <Select value={fontFamily} onValueChange={setFontFamily}>
+                <Select 
+                  value={settings.fontFamily} 
+                  onValueChange={(value) => onSettingsChange({...settings, fontFamily: value})}
+                >
                   <SelectTrigger id="font-family">
                     <SelectValue placeholder="Select font" />
                   </SelectTrigger>
@@ -69,7 +82,7 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="font-size">Font Size: {fontSize}pt</Label>
+                  <Label htmlFor="font-size">Font Size: {settings.fontSize}pt</Label>
                   <span className="text-sm text-gray-500">10-14pt</span>
                 </div>
                 <Slider 
@@ -77,15 +90,15 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
                   min={10} 
                   max={14} 
                   step={0.5} 
-                  value={[fontSize]} 
-                  onValueChange={(value) => setFontSize(value[0])} 
+                  value={[settings.fontSize]} 
+                  onValueChange={(value) => onSettingsChange({...settings, fontSize: value[0]})}
                   className="w-full" 
                 />
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="line-spacing">Line Spacing: {lineSpacing.toFixed(2)}</Label>
+                  <Label htmlFor="line-spacing">Line Spacing: {settings.lineSpacing.toFixed(2)}</Label>
                   <span className="text-sm text-gray-500">1.0-1.5</span>
                 </div>
                 <Slider 
@@ -93,8 +106,8 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
                   min={1.0} 
                   max={1.5} 
                   step={0.05} 
-                  value={[lineSpacing]} 
-                  onValueChange={(value) => setLineSpacing(value[0])} 
+                  value={[settings.lineSpacing]} 
+                  onValueChange={(value) => onSettingsChange({...settings, lineSpacing: value[0]})}
                   className="w-full" 
                 />
               </div>
@@ -108,8 +121,8 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
                 </div>
                 <Switch 
                   id="auto-adjust" 
-                  checked={autoAdjust} 
-                  onCheckedChange={setAutoAdjust} 
+                  checked={settings.autoAdjust} 
+                  onCheckedChange={(value) => onSettingsChange({...settings, autoAdjust: value})}
                 />
               </div>
               
@@ -120,14 +133,20 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
                 </div>
                 <Switch 
                   id="ats-mode" 
-                  checked={atsMode} 
-                  onCheckedChange={setAtsMode} 
+                  checked={settings.atsMode} 
+                  onCheckedChange={(value) => onSettingsChange({...settings, atsMode: value})}
                 />
               </div>
               
-              <Button className="w-full">
+              <Button 
+                className="w-full"
+                onClick={() => {
+                  // Save functionality could be added in the future
+                  // For now, settings are saved automatically via onChange
+                }}
+              >
                 <Save className="mr-2 h-4 w-4" />
-                Save Formatting Settings
+                Apply Formatting Settings
               </Button>
             </div>
           </Card>
@@ -142,10 +161,18 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
               <div className="space-y-2">
                 <Label>Paper Size</Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="flex items-center justify-center py-6 border-primary">
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center justify-center py-6 ${settings.paperSize === 'letter' ? 'border-primary' : ''}`}
+                    onClick={() => onSettingsChange({...settings, paperSize: 'letter'})}
+                  >
                     Letter (8.5" × 11")
                   </Button>
-                  <Button variant="outline" className="flex items-center justify-center py-6">
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center justify-center py-6 ${settings.paperSize === 'a4' ? 'border-primary' : ''}`}
+                    onClick={() => onSettingsChange({...settings, paperSize: 'a4'})}
+                  >
                     A4 (210mm × 297mm)
                   </Button>
                 </div>
@@ -154,13 +181,25 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
               <div className="space-y-2">
                 <Label>File Format</Label>
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" className="flex items-center justify-center py-4 border-primary">
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center justify-center py-4 ${settings.fileFormat === 'pdf' ? 'border-primary' : ''}`}
+                    onClick={() => onSettingsChange({...settings, fileFormat: 'pdf'})}
+                  >
                     PDF
                   </Button>
-                  <Button variant="outline" className="flex items-center justify-center py-4">
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center justify-center py-4 ${settings.fileFormat === 'docx' ? 'border-primary' : ''}`}
+                    onClick={() => onSettingsChange({...settings, fileFormat: 'docx'})}
+                  >
                     DOCX
                   </Button>
-                  <Button variant="outline" className="flex items-center justify-center py-4">
+                  <Button 
+                    variant="outline" 
+                    className={`flex items-center justify-center py-4 ${settings.fileFormat === 'txt' ? 'border-primary' : ''}`}
+                    onClick={() => onSettingsChange({...settings, fileFormat: 'txt'})}
+                  >
                     TXT
                   </Button>
                 </div>
@@ -182,7 +221,18 @@ export default function SettingsPanel({ activeTemplate, onTemplateChange }: Sett
                 <Switch id="high-res" defaultChecked />
               </div>
               
-              <Button className="w-full">
+              <Button 
+                className="w-full"
+                onClick={() => onSettingsChange({
+                  fontSize: 11,
+                  fontFamily: "times",
+                  lineSpacing: 1.15,
+                  autoAdjust: true,
+                  atsMode: true,
+                  paperSize: "letter",
+                  fileFormat: "pdf"
+                })}
+              >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Restore Default Settings
               </Button>
