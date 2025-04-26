@@ -627,7 +627,11 @@ export default function ResumeCanvas({ resumeData, template, settings = {
   };
 
   return (
-    <div className="resume-page w-[8.5in] h-[11in] bg-white shadow-md" id="resume-preview">
+    <div 
+      className={`resume-page ${settings.paperSize === 'letter' ? 'w-[8.5in] h-[11in]' : 'w-[210mm] h-[297mm]'} bg-white shadow-md`} 
+      id="resume-preview"
+      style={resumeStyles}
+    >
       {renderTemplate()}
     </div>
   );
