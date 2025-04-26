@@ -4,12 +4,15 @@ import Sidebar from "@/components/Sidebar";
 import FormPanel from "@/components/FormPanel";
 import ResumeCanvas from "@/components/ResumeCanvas";
 import LLMAssistantModal from "@/components/LLMAssistantModal";
+import AIAssistantChat from "@/components/AIAssistantChat";
 import useResumeData from "@/hooks/useResumeData";
 import { ResumeTemplate } from "@shared/schema";
 import { Separator } from "@/components/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 export type SectionType = 
   | "personal"

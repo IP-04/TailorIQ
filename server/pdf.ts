@@ -1,40 +1,67 @@
 import { Resume, ResumeTemplate } from "@shared/schema";
 import puppeteer from "puppeteer";
+import { generateJakeGutTemplate } from "./jakeGutTemplate";
 
 // Function to generate a PDF from resume data and selected template
 export async function generatePDF(resumeData: Resume, template: ResumeTemplate): Promise<Buffer> {
+  let browser = null;
   try {
     // Generate the HTML for the resume
     const htmlContent = generateResumeHTML(resumeData, template);
 
-    // Launch Puppeteer in serverless mode
-    const browser = await puppeteer.launch({
+    // Launch Puppeteer in serverless mode with more robust options
+    browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions'
+      ]
     });
 
     const page = await browser.newPage();
+    
+    // Set viewport size to ensure content fits properly
+    await page.setViewport({ width: 1100, height: 1400 });
 
-    // Set content to the HTML
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    // Set content to the HTML with longer timeout
+    await page.setContent(htmlContent, { 
+      waitUntil: 'networkidle0',
+      timeout: 30000 
+    });
 
-    // Generate the PDF
-    const pdfBuffer = await page.pdf({
+    // Generate the PDF with better formatting
+    const pdfData = await page.pdf({
       format: 'Letter',
       printBackground: true,
       margin: {
-        top: '0.4in',
-        right: '0.4in',
-        bottom: '0.4in',
-        left: '0.4in'
-      }
+        top: '0.5in',
+        right: '0.5in',
+        bottom: '0.5in',
+        left: '0.5in'
+      },
+      preferCSSPageSize: true
     });
-
-    await browser.close();
+    
+    // Convert Uint8Array to Buffer
+    const pdfBuffer = Buffer.from(pdfData);
     return pdfBuffer;
   } catch (error) {
     console.error("Error generating PDF:", error);
-    throw new Error("Failed to generate PDF");
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Failed to generate PDF: ${errorMessage}`);
+  } finally {
+    // Make sure browser closes even if there's an error
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (closeError) {
+        console.error("Error closing browser:", closeError);
+      }
+    }
   }
 }
 
@@ -47,19 +74,26 @@ function generateResumeHTML(resumeData: Resume, template: ResumeTemplate): strin
       padding: 0;
       box-sizing: border-box;
       color: #333;
+      line-height: 1.6;
     }
     .resume-page {
       width: 8.5in;
       height: 11in;
-      padding: 0.5in;
+      padding: 0.6in;
       box-sizing: border-box;
+      background-color: white;
     }
-    .text-primary {
-      color: #3B82F6;
+    @page {
+      size: letter portrait;
+      margin: 0;
     }
   `;
 
-  // Get the template-specific HTML
+  // Get the template-specific HTML - Default to Jake Gut template for all options
+  // Use jake gut template for better professional formatting
+  const templateHTML = generateJakeGutTemplate(resumeData);
+  
+  /* Original template selection (disabled for professional formatting)
   let templateHTML = '';
   switch (template) {
     case 'modern':
@@ -77,6 +111,7 @@ function generateResumeHTML(resumeData: Resume, template: ResumeTemplate): strin
     default:
       templateHTML = generateModernTemplate(resumeData);
   }
+  */
 
   // Complete HTML document
   return `
