@@ -26,6 +26,7 @@ export default function ResumeMaker() {
   const [activeSection, setActiveSection] = useState<SectionType>("personal");
   const [isMobilePreviewVisible, setIsMobilePreviewVisible] = useState(false);
   const [isLLMModalOpen, setIsLLMModalOpen] = useState(false);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [llmSuggestions, setLlmSuggestions] = useState<{
     section: string;
     title: string;
@@ -96,7 +97,11 @@ export default function ResumeMaker() {
   };
 
   const handleAIAssistant = () => {
-    llmReviewMutation.mutate();
+    // Use the new interactive chat assistant instead of the modal
+    setIsAIChatOpen(true);
+    
+    // Legacy modal-based assistant (disabled)
+    // llmReviewMutation.mutate();
   };
 
   const handleApplySuggestion = (index: number) => {
@@ -216,7 +221,24 @@ export default function ResumeMaker() {
           onApplySuggestion={handleApplySuggestion}
           onApplyAll={handleApplyAllSuggestions}
         />
+
+        {/* AI Chat Assistant */}
+        <AIAssistantChat 
+          resumeData={resumeData}
+          setResumeData={setResumeData}
+          isOpen={isAIChatOpen}
+          onClose={() => setIsAIChatOpen(false)}
+        />
       </div>
+
+      {/* AI Chat Button (Fixed Position) */}
+      <Button
+        onClick={() => setIsAIChatOpen(true)}
+        className="fixed bottom-20 right-6 z-40 rounded-full w-12 h-12 shadow-lg lg:flex items-center justify-center hidden"
+        size="icon"
+      >
+        <MessageCircle className="h-6 w-6" />
+      </Button>
       
       {/* Mobile Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3">

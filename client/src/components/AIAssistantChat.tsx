@@ -163,7 +163,7 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
         sectionToImprove = 'experience description';
       }
       
-      const response = await getImprovement(sectionToImprove, text, context);
+      const response = await getImprovement(sectionToImprove, text || "", context || "");
       
       // Update the placeholder message with the response
       setMessages(prev => prev.map(msg => 
@@ -273,7 +273,7 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
           updatedResumeData.experience[index].description = improved;
         } else {
           // Split by new lines to create separate achievements
-          updatedResumeData.experience[index].achievements = improved.split('\n').filter(item => item.trim() !== '');
+          updatedResumeData.experience[index].achievements = improved.split('\n').filter((item: string) => item.trim() !== '');
         }
       }
     } else if (section === 'skills') {
