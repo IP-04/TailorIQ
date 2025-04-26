@@ -1,7 +1,31 @@
 import { Resume } from "@shared/schema";
 
 // Jake Gutierrez's resume template based on the LaTeX format provided
-export function generateJakeGutTemplate(resumeData: Resume): string {
+export function generateJakeGutTemplate(resumeData: Resume, settings: any = {}): string {
+  // Function to get font family CSS
+  const getFontFamily = (fontFamily: string): string => {
+    switch (fontFamily) {
+      case 'times':
+        return "'Times New Roman', Times, serif";
+      case 'calibri':
+        return "Calibri, 'Segoe UI', sans-serif";
+      case 'arial':
+        return "Arial, Helvetica, sans-serif";
+      case 'garamond':
+        return "Garamond, Georgia, serif";
+      case 'helvetica':
+        return "Helvetica, Arial, sans-serif";
+      default:
+        return "'Times New Roman', Times, serif";
+    }
+  };
+
+  // Use settings or defaults
+  const fontSize = settings.fontSize || 11;
+  const fontFamily = settings.fontFamily || 'times';
+  const lineSpacing = settings.lineSpacing || 1.15;
+  const paperSize = settings.paperSize || 'letter';
+
   return `
     <style>
       /* Reset and base styles */
@@ -11,11 +35,11 @@ export function generateJakeGutTemplate(resumeData: Resume): string {
         padding: 0;
       }
       body {
-        font-family: 'Times New Roman', serif;
+        font-family: ${getFontFamily(fontFamily)};
         color: #000;
-        font-size: 11pt;
-        line-height: 1.3;
-        max-width: 8.5in;
+        font-size: ${fontSize}pt;
+        line-height: ${lineSpacing};
+        max-width: ${paperSize === 'letter' ? '8.5in' : '210mm'};
       }
       .resume-container {
         max-width: 100%;

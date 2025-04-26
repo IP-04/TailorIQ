@@ -45,13 +45,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/resume/generate-pdf", async (req, res) => {
     try {
-      const { resumeData, template } = req.body;
+      const { resumeData, template, settings } = req.body;
       
       if (!resumeData || !template) {
         return res.status(400).json({ message: "Resume data and template are required" });
       }
       
-      const pdfBuffer = await generatePDF(resumeData, template);
+      const pdfBuffer = await generatePDF(resumeData, template, settings);
       
       // Set the appropriate headers
       res.setHeader('Content-Type', 'application/pdf');

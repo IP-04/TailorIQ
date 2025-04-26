@@ -125,7 +125,7 @@ function generateResumeHTML(resumeData: Resume, template: ResumeTemplate, settin
 
   // Get the template-specific HTML - Default to Jake Gut template for all options
   // Use jake gut template for better professional formatting
-  const templateHTML = generateJakeGutTemplate(resumeData);
+  const templateHTML = generateJakeGutTemplate(resumeData, settings);
   
   /* Original template selection (disabled for professional formatting)
   let templateHTML = '';

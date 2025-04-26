@@ -52,7 +52,11 @@ export default function ResumeMaker() {
 
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/resume/generate-pdf", { resumeData, template: activeTemplate });
+      const response = await apiRequest("POST", "/api/resume/generate-pdf", { 
+        resumeData, 
+        template: activeTemplate,
+        settings
+      });
       return response.blob();
     },
     onSuccess: (blob) => {
