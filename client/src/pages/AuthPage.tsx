@@ -1,10 +1,10 @@
 import React from 'react';
-import GuestAuth from '@/components/GuestAuth';
+import Auth from '@/components/Auth';
 
 interface AuthPageProps {
   darkMode: boolean;
 }
 
 export default function AuthPage({ darkMode }: AuthPageProps) {
-  return <GuestAuth darkMode={darkMode} />;
+  return <Auth darkMode={darkMode} />;
 }
