@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Bot, Send, User, CheckCircle } from 'lucide-react';
 import { Resume } from '@shared/schema';
-import { getImprovement } from '@/lib/openai';
+import { getImprovement, sendChatMessage } from '@/lib/openai';
 import { useToast } from "@/hooks/use-toast";
 
 interface AIAssistantChatProps {
@@ -74,8 +74,8 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
       // Process the message to determine user intent
       const userIntent = analyzeUserIntent(inputText);
       
-      if (userIntent.type === 'improve') {
-        await handleImproveRequest(userIntent.section, userIntent.text, placeholderId);
+      if (userIntent.type === 'improve' && userIntent.section) {
+        await handleImproveRequest(userIntent.section, userIntent.text || "", placeholderId);
       } else if (userIntent.type === 'question') {
         await handleQuestionRequest(inputText, placeholderId);
       } else {
@@ -108,7 +108,11 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
   };
 
   // Analyze user input to determine intent
-  const analyzeUserIntent = (text: string) => {
+  const analyzeUserIntent = (text: string): { 
+    type: 'improve' | 'question' | 'general'; 
+    section?: string; 
+    text?: string; 
+  } => {
     const textLower = text.toLowerCase();
     
     // Check for improvement requests
@@ -151,7 +155,7 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
   };
 
   // Handle requests to improve resume sections
-  const handleImproveRequest = async (section: string, text: string, placeholderId: number) => {
+  const handleImproveRequest = async (section: string, text: string | undefined, placeholderId: number) => {
     try {
       let sectionToImprove = section;
       let context = '';
@@ -188,36 +192,11 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
     }
   };
 
-  // Handle question requests
+  // Handle question requests using the AI chat API
   const handleQuestionRequest = async (question: string, placeholderId: number) => {
     try {
-      // For now, we'll handle questions with pre-defined responses
-      // In a full implementation, this would call the OpenAI API
-      const responses: Record<string, string> = {
-        'resume length': "Your resume should typically be 1 page if you have less than 10 years of experience. Only extend to 2 pages if you have extensive relevant experience that directly relates to the job you're applying for.",
-        'skills section': "The skills section should highlight your most relevant technical and soft skills. Prioritize skills mentioned in the job description you're applying for, and try to limit to 8-12 skills to avoid overwhelming the reader.",
-        'bullet points': "Each bullet point should start with a strong action verb and focus on accomplishments rather than duties. Quantify your achievements whenever possible (e.g., 'Increased sales by 20%' rather than 'Responsible for sales').",
-        'format': "A clean, consistent format is essential. Use the same font throughout (10-12pt size), maintain consistent spacing, and ensure there's enough white space to make your resume readable.",
-        'ats': "To make your resume ATS (Applicant Tracking System) friendly, use standard section headings, incorporate keywords from the job description, avoid tables or columns, and stick to standard fonts like Arial, Calibri, or Times New Roman.",
-      };
-      
-      let responseText = "I don't have specific information about that, but here's what I can suggest: ";
-      
-      for (const [key, value] of Object.entries(responses)) {
-        if (question.toLowerCase().includes(key)) {
-          responseText = value;
-          break;
-        }
-      }
-      
-      setTimeout(() => {
-        setMessages(prev => prev.map(msg => 
-          msg.id === placeholderId 
-            ? { ...msg, text: responseText, processing: false } 
-            : msg
-        ));
-      }, 1000);
-      
+      // Forward the question to the AI chat API, same as general requests
+      await handleGeneralRequest(question, placeholderId);
     } catch (error) {
       console.error("Error responding to question:", error);
       setMessages(prev => prev.map(msg => 
@@ -228,20 +207,52 @@ export default function AIAssistantChat({ resumeData, setResumeData, isOpen, onC
     }
   };
 
-  // Handle general requests
+  // Handle general requests with the AI chat API
   const handleGeneralRequest = async (text: string, placeholderId: number) => {
     try {
-      // For now, we'll provide a generic response
-      const responseText = "I understand you want general assistance. To help you better, could you specify which part of your resume you'd like help with? For example, you could ask me to improve your summary, job descriptions, or skills section.";
+      // Convert messages to the format expected by the API
+      const messageHistory = messages
+        .filter(msg => !msg.processing) // Filter out processing messages
+        .map(msg => ({
+          role: msg.sender,
+          content: msg.text
+        }));
+        
+      // Add the current user message
+      messageHistory.push({
+        role: 'user',
+        content: text
+      });
       
-      setTimeout(() => {
+      // Send the chat request to the API
+      const response = await sendChatMessage({
+        resumeData,
+        messages: messageHistory,
+        instruction: "Focus on providing specific, actionable advice to improve the resume."
+      });
+      
+      // Process the response
+      if (response && response.message) {
+        // Update the placeholder message with the AI response
         setMessages(prev => prev.map(msg => 
           msg.id === placeholderId 
-            ? { ...msg, text: responseText, processing: false } 
+            ? { 
+                ...msg, 
+                text: response.message,
+                processing: false,
+                actionType: response.suggestedActions && response.suggestedActions.length > 0 ? 'suggestion' : undefined,
+                actionContent: response.suggestedActions && response.suggestedActions.length > 0 ? {
+                  original: response.suggestedActions[0].originalContent,
+                  improved: response.suggestedActions[0].suggestedContent,
+                  section: response.suggestedActions[0].targetSection,
+                  explanation: response.suggestedActions[0].explanation
+                } : undefined
+              } 
             : msg
         ));
-      }, 1000);
-      
+      } else {
+        throw new Error("Invalid response from AI chat service");
+      }
     } catch (error) {
       console.error("Error responding to general request:", error);
       setMessages(prev => prev.map(msg => 
