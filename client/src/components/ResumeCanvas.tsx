@@ -3,9 +3,51 @@ import { Resume, ResumeTemplate } from "@shared/schema";
 interface ResumeCanvasProps {
   resumeData: Resume;
   template: ResumeTemplate;
+  settings?: {
+    fontSize: number;
+    fontFamily: string;
+    lineSpacing: number;
+    autoAdjust: boolean;
+    atsMode: boolean;
+    paperSize: string;
+    fileFormat: string;
+  };
 }
 
-export default function ResumeCanvas({ resumeData, template }: ResumeCanvasProps) {
+export default function ResumeCanvas({ resumeData, template, settings = {
+  fontSize: 11,
+  fontFamily: "times",
+  lineSpacing: 1.15,
+  autoAdjust: true,
+  atsMode: true,
+  paperSize: "letter",
+  fileFormat: "pdf"
+} }: ResumeCanvasProps) {
+  // Function to get the font family CSS based on the selected font
+  const getFontFamily = (fontFamily: string): string => {
+    switch (fontFamily) {
+      case 'times':
+        return "'Times New Roman', Times, serif";
+      case 'calibri':
+        return "Calibri, 'Segoe UI', sans-serif";
+      case 'arial':
+        return "Arial, Helvetica, sans-serif";
+      case 'garamond':
+        return "Garamond, Georgia, serif";
+      case 'helvetica':
+        return "Helvetica, Arial, sans-serif";
+      default:
+        return "'Times New Roman', Times, serif";
+    }
+  };
+
+  // Apply global styles based on settings
+  const resumeStyles = {
+    fontFamily: getFontFamily(settings.fontFamily),
+    fontSize: `${settings.fontSize}pt`,
+    lineHeight: settings.lineSpacing.toString(),
+  };
+
   // A function to render different templates based on the template prop
   const renderTemplate = () => {
     switch (template) {

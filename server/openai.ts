@@ -20,7 +20,7 @@ interface ChatResponse {
   }[];
 }
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "demo-key",
+  apiKey: process.env.OPENAI_API_KEY || "",
 });
 
 // Function to generate resume review suggestions

@@ -36,6 +36,16 @@ export default function ResumeMaker() {
     original: string;
     suggestion: string;
   }[]>([]);
+  
+  const [settings, setSettings] = useState({
+    fontSize: 11,
+    fontFamily: "times",
+    lineSpacing: 1.15,
+    autoAdjust: true,
+    atsMode: true,
+    paperSize: "letter", // letter or a4
+    fileFormat: "pdf"
+  });
 
   const { toast } = useToast();
   const { resumeData, setResumeData, activeTemplate, setActiveTemplate } = useResumeData();
@@ -218,6 +228,7 @@ export default function ResumeMaker() {
           <ResumeCanvas 
             resumeData={resumeData} 
             template={activeTemplate}
+            settings={settings}
           />
         </div>
         
@@ -266,6 +277,8 @@ export default function ResumeMaker() {
             <SettingsPanel 
               activeTemplate={activeTemplate}
               onTemplateChange={setActiveTemplate}
+              settings={settings}
+              onSettingsChange={setSettings}
             />
           </div>
         </DialogContent>
