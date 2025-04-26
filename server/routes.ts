@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { generateResumeReview, generateTextImprovement } from "./openai";
+import { generateResumeReview, generateTextImprovement, processAIChatMessage } from "./openai";
 import { generatePDF } from "./pdf";
 import { Resume } from "@shared/schema";
 
@@ -72,13 +72,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real authentication system, you would get the user ID from the session
       const userId = "anonymous";
       
+      // Create resume with only the fields required by the schema
       const resume = await storage.createResume({
         userId,
         title,
         template,
-        content,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        content
       });
       
       res.status(201).json(resume);
@@ -118,6 +117,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user resumes:", error);
       res.status(500).json({ message: "Error fetching user resumes" });
+    }
+  });
+
+  // AI Chat Assistant endpoint
+  app.post("/api/resume/chat-assistant", async (req, res) => {
+    try {
+      const { resumeData, messages, instruction } = req.body;
+      
+      if (!resumeData || !messages || !messages.length) {
+        return res.status(400).json({ 
+          message: "Resume data and chat messages are required" 
+        });
+      }
+      
+      const response = await processAIChatMessage(resumeData, messages, instruction);
+      
+      res.json({ response });
+    } catch (error) {
+      console.error("Error processing chat message:", error);
+      res.status(500).json({ 
+        message: "Error processing chat message",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 

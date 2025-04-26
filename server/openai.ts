@@ -2,6 +2,23 @@ import { Resume } from "@shared/schema";
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+
+// Define interfaces for the chat functionality
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+interface ChatResponse {
+  message: string;
+  suggestedActions?: {
+    actionType: 'update_resume' | 'general_advice';
+    targetSection?: string;
+    originalContent?: string;
+    suggestedContent?: string;
+    explanation?: string;
+  }[];
+}
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "demo-key",
 });
@@ -113,6 +130,77 @@ export async function generateTextImprovement(section: string, text: string, con
       original: text,
       improved: text,
       explanation: "Unable to generate improvements at this time."
+    };
+  }
+}
+
+// Function to process chat messages from the AI assistant
+export async function processAIChatMessage(
+  resumeData: Resume,
+  clientMessages: Array<{ role: 'user' | 'assistant'; content: string }>,
+  instruction?: string
+): Promise<ChatResponse> {
+  try {
+    // Convert client messages to the format expected by OpenAI
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are ResumeAI, an expert resume assistant helping users improve their resume.
+        
+        Your goals:
+        1. Provide helpful, specific advice to improve the user's resume
+        2. When the user asks for improvements to specific sections, provide concrete suggestions
+        3. Be friendly, professional, and encouraging
+        
+        Important instructions:
+        - Keep your responses concise and focused (max 3-4 sentences unless a specific improvement is requested)
+        - When suggesting improvements, be specific and explain why the change helps
+        - Format any resume content suggestions to match the style of the existing resume
+        
+        ${instruction || ''}
+        
+        Current resume data: ${JSON.stringify(resumeData, null, 2)}
+        
+        RESPONSE FORMAT:
+        You must return a JSON object with the following structure:
+        {
+          "message": "Your natural language response to the user",
+          "suggestedActions": [
+            {
+              "actionType": "update_resume" or "general_advice",
+              "targetSection": "path to the section (e.g. summary, experience[0].description)",
+              "originalContent": "the original content",
+              "suggestedContent": "your suggested improved content",
+              "explanation": "brief explanation of why this change helps"
+            }
+          ]
+        }
+        
+        Only include suggestedActions when you have specific content changes to recommend.`
+      },
+      ...clientMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: messages as any,
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("Empty response from OpenAI");
+    }
+
+    return JSON.parse(content) as ChatResponse;
+  } catch (error) {
+    console.error("Error processing chat message:", error);
+    return {
+      message: "I'm having trouble processing your request. Please try again with a more specific question about your resume."
     };
   }
 }
