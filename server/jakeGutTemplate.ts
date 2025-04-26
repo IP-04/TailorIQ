@@ -1,149 +1,161 @@
 import { Resume } from "@shared/schema";
 
-// Jake Gut inspired resume template
+// Jake Gutierrez's resume template based on the LaTeX format provided
 export function generateJakeGutTemplate(resumeData: Resume): string {
   return `
     <style>
-      /* Main styles inspired by Jake Gut's resume template */
+      /* Reset and base styles */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        color: #333;
-        line-height: 1.5;
-        font-size: 13px;
+        font-family: 'Times New Roman', serif;
+        color: #000;
+        font-size: 11pt;
+        line-height: 1.3;
+        max-width: 8.5in;
       }
       .resume-container {
         max-width: 100%;
         margin: 0 auto;
+        padding: 0.5in;
       }
+      a {
+        color: #000;
+        text-decoration: underline;
+      }
+
       /* Header section */
       .header {
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 16pt;
       }
       .header h1 {
-        font-size: 24px;
+        font-size: 24pt;
         font-weight: bold;
-        margin: 0;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #222;
+        margin: 0;
+        letter-spacing: 1pt;
       }
       .contact-info {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 5px;
-        font-size: 11px;
+        gap: 8pt;
+        margin-top: 6pt;
+        font-size: 10pt;
       }
-      .contact-info a {
-        color: #2D7788;
-        text-decoration: none;
-      }
-      .contact-item {
-        display: flex;
-        align-items: center;
-      }
-      .contact-item i {
-        margin-right: 5px;
+      .contact-divider {
+        font-weight: normal;
       }
       
       /* Section styles */
       .section {
-        margin-bottom: 15px;
+        margin-bottom: 12pt;
         page-break-inside: avoid;
       }
       .section-heading {
-        font-size: 16px;
+        font-size: 12pt;
         font-weight: bold;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #444;
-        border-bottom: 1px solid #999;
-        margin-bottom: 10px;
-        padding-bottom: 3px;
+        letter-spacing: 1pt;
+        margin-bottom: 6pt;
+        border-bottom: 1px solid #000;
+        padding-bottom: 2pt;
       }
       
-      /* Experience items */
+      /* Experience and education items */
       .experience-item, .education-item {
-        margin-bottom: 12px;
+        margin-bottom: 10pt;
         page-break-inside: avoid;
       }
       .item-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        margin-bottom: 2pt;
       }
       .company, .institution {
         font-weight: bold;
-        font-size: 12px;
       }
       .position, .degree {
-        font-weight: normal;
         font-style: italic;
-        font-size: 12px;
       }
       .period {
-        font-size: 11px;
-        color: #555;
-        min-width: 120px;
         text-align: right;
       }
       
       /* Lists */
       .achievements {
-        margin: 5px 0 0 0;
-        padding-left: 18px;
-        list-style-type: disc;
+        margin: 4pt 0 0 16pt;
+        padding-left: 6pt;
       }
       .achievements li {
-        margin-bottom: 5px;
-        padding-left: 5px;
+        margin-bottom: 4pt;
         line-height: 1.4;
       }
       
       /* Skills section */
-      .skills-section {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+      .skills-container {
+        margin-top: 4pt;
       }
-      .skill-category {
+      .skills-category {
+        margin-bottom: 4pt;
         display: flex;
+        align-items: flex-start;
       }
-      .skill-category-name {
+      .skills-category-title {
         font-weight: bold;
-        min-width: 120px;
+        min-width: 100pt;
       }
-      .skill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px 8px;
-      }
-      .summary {
-        text-align: justify;
-        hyphens: auto;
+      .skills-list {
+        flex: 1;
       }
     </style>
 
     <div class="resume-container">
-      <!-- Header -->
+      <!-- Header with name and contact info (following Jake's LaTeX template) -->
       <div class="header">
         <h1>${resumeData.personalInfo.firstName} ${resumeData.personalInfo.lastName}</h1>
         <div class="contact-info">
-          ${resumeData.personalInfo.email ? `<span class="contact-item"><i>📧</i> ${resumeData.personalInfo.email}</span>` : ''}
-          ${resumeData.personalInfo.phone ? `<span class="contact-item"><i>📱</i> ${resumeData.personalInfo.phone}</span>` : ''}
-          ${resumeData.personalInfo.location ? `<span class="contact-item"><i>📍</i> ${resumeData.personalInfo.location}</span>` : ''}
-          ${resumeData.personalInfo.linkedin ? `<span class="contact-item"><i>🔗</i> ${resumeData.personalInfo.linkedin}</span>` : ''}
-          ${resumeData.personalInfo.portfolio ? `<span class="contact-item"><i>🌐</i> ${resumeData.personalInfo.portfolio}</span>` : ''}
+          ${resumeData.personalInfo.phone ? `${resumeData.personalInfo.phone}` : ''}
+          ${resumeData.personalInfo.phone && resumeData.personalInfo.email ? ` <span class="contact-divider">|</span> ` : ''}
+          ${resumeData.personalInfo.email ? `<a href="mailto:${resumeData.personalInfo.email}">${resumeData.personalInfo.email}</a>` : ''}
+          ${(resumeData.personalInfo.phone || resumeData.personalInfo.email) && resumeData.personalInfo.linkedin ? ` <span class="contact-divider">|</span> ` : ''}
+          ${resumeData.personalInfo.linkedin ? `<a href="${resumeData.personalInfo.linkedin}">${resumeData.personalInfo.linkedin.replace('https://', '')}</a>` : ''}
+          ${(resumeData.personalInfo.phone || resumeData.personalInfo.email || resumeData.personalInfo.linkedin) && resumeData.personalInfo.portfolio ? ` <span class="contact-divider">|</span> ` : ''}
+          ${resumeData.personalInfo.portfolio ? `<a href="${resumeData.personalInfo.portfolio}">${resumeData.personalInfo.portfolio.replace('https://', '')}</a>` : ''}
         </div>
       </div>
 
-      <!-- Summary Section -->
-      ${resumeData.summary ? `
+      <!-- Education Section - First per Jake's template -->
+      ${resumeData.education.length > 0 ? `
       <div class="section">
-        <h2 class="section-heading">Summary</h2>
-        <p class="summary">${resumeData.summary}</p>
+        <h2 class="section-heading">Education</h2>
+        <div class="resume-sub-heading-list">
+          ${resumeData.education.map(edu => `
+            <div class="education-item">
+              <div class="item-header">
+                <div class="left-column">
+                  <div><span class="institution">${edu.institution}</span></div>
+                  <div><span class="degree">${edu.degree}${edu.field ? ` in ${edu.field}` : ''}</span></div>
+                </div>
+                <div class="right-column">
+                  <div class="period">${edu.period}</div>
+                </div>
+              </div>
+              ${(edu.gpa || edu.additionalInfo) ? `
+                <div style="font-size: 10pt; margin-top: 2pt;">
+                  ${edu.gpa ? `GPA: ${edu.gpa}` : ''} 
+                  ${(edu.gpa && edu.additionalInfo) ? ' | ' : ''}
+                  ${edu.additionalInfo || ''}
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
       </div>
       ` : ''}
 
@@ -151,62 +163,83 @@ export function generateJakeGutTemplate(resumeData: Resume): string {
       ${resumeData.experience.length > 0 ? `
       <div class="section">
         <h2 class="section-heading">Experience</h2>
-        ${resumeData.experience.map(exp => `
-          <div class="experience-item">
-            <div class="item-header">
-              <div>
-                <div class="company">${exp.company}</div>
-                <div class="position">${exp.title}${exp.location ? ` | ${exp.location}` : ''}</div>
+        <div class="resume-sub-heading-list">
+          ${resumeData.experience.map(exp => `
+            <div class="experience-item">
+              <div class="item-header">
+                <div class="left-column">
+                  <div><span class="company">${exp.company}</span></div>
+                  <div><span class="position">${exp.title}</span>${exp.location ? `, ${exp.location}` : ''}</div>
+                </div>
+                <div class="right-column">
+                  <div class="period">${exp.period}</div>
+                </div>
               </div>
-              <div class="period">${exp.period}</div>
+              ${exp.description ? `<div style="margin-top: 2pt;">${exp.description}</div>` : ''}
+              ${exp.achievements && exp.achievements.length > 0 ? `
+                <ul class="achievements">
+                  ${exp.achievements.filter(achievement => achievement.trim()).map(achievement => `
+                    <li>${achievement}</li>
+                  `).join('')}
+                </ul>
+              ` : ''}
             </div>
-            ${exp.achievements && exp.achievements.length > 0 ? `
-              <ul class="achievements">
-                ${exp.achievements.filter(achievement => achievement.trim()).map(achievement => `
-                  <li>${achievement}</li>
-                `).join('')}
-              </ul>
-            ` : ''}
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
       ` : ''}
 
-      <!-- Education Section -->
-      ${resumeData.education.length > 0 ? `
+      <!-- Projects Section - if needed -->
+      ${resumeData.summary ? `
       <div class="section">
-        <h2 class="section-heading">Education</h2>
-        ${resumeData.education.map(edu => `
-          <div class="education-item">
+        <h2 class="section-heading">Projects</h2>
+        <div class="resume-sub-heading-list">
+          <div class="project-item">
             <div class="item-header">
-              <div>
-                <div class="institution">${edu.institution}</div>
-                <div class="degree">${edu.degree}${edu.field ? ` in ${edu.field}` : ''}</div>
+              <div class="left-column">
+                <div><span class="project-title"><b>Resume Builder</b> | <i>React, Node.js, OpenAI API</i></span></div>
               </div>
-              <div class="period">${edu.period}</div>
+              <div class="right-column">
+                <div class="period">April 2024 - Present</div>
+              </div>
             </div>
-            ${(edu.gpa || edu.additionalInfo) ? `
-              <div style="font-size: 11px; margin-top: 3px; color: #555;">
-                ${edu.gpa ? `GPA: ${edu.gpa}` : ''} 
-                ${(edu.gpa && edu.additionalInfo) ? ' | ' : ''}
-                ${edu.additionalInfo || ''}
-              </div>
-            ` : ''}
+            <ul class="achievements">
+              <li>Developed a full-stack resume creation tool with customizable templates and AI-powered content assistance</li>
+              <li>Implemented dynamic content scaling and PDF export functionality with proper formatting</li>
+              <li>Integrated OpenAI API for contextual resume improvement suggestions and real-time feedback</li>
+            </ul>
           </div>
-        `).join('')}
+        </div>
       </div>
       ` : ''}
 
       <!-- Skills Section -->
       ${resumeData.skills.length > 0 ? `
       <div class="section">
-        <h2 class="section-heading">Skills</h2>
-        <div class="skills-section">
-          <div class="skill-category">
-            <div class="skill-list">
-              ${resumeData.skills.filter(skill => skill.trim()).map(skill => `
-                <span>${skill}</span>${resumeData.skills.indexOf(skill) < resumeData.skills.length - 1 ? ' •' : ''}
-              `).join(' ')}
+        <h2 class="section-heading">Technical Skills</h2>
+        <div class="skills-container">
+          <div class="skills-category">
+            <div class="skills-category-title">Languages:</div>
+            <div class="skills-list">
+              ${resumeData.skills.filter(skill => skill.includes('Java') || skill.includes('Python') || skill.includes('C++') || skill.includes('JavaScript') || skill.includes('TypeScript') || skill.includes('SQL') || skill.includes('HTML') || skill.includes('CSS')).length > 0 
+                ? resumeData.skills.filter(skill => skill.includes('Java') || skill.includes('Python') || skill.includes('C++') || skill.includes('JavaScript') || skill.includes('TypeScript') || skill.includes('SQL') || skill.includes('HTML') || skill.includes('CSS')).join(', ')
+                : resumeData.skills.slice(0, Math.ceil(resumeData.skills.length / 3)).join(', ')}
+            </div>
+          </div>
+          <div class="skills-category">
+            <div class="skills-category-title">Frameworks:</div>
+            <div class="skills-list">
+              ${resumeData.skills.filter(skill => skill.includes('React') || skill.includes('Node') || skill.includes('Express') || skill.includes('Angular') || skill.includes('Vue') || skill.includes('Django') || skill.includes('Flask') || skill.includes('Spring')).length > 0 
+                ? resumeData.skills.filter(skill => skill.includes('React') || skill.includes('Node') || skill.includes('Express') || skill.includes('Angular') || skill.includes('Vue') || skill.includes('Django') || skill.includes('Flask') || skill.includes('Spring')).join(', ')
+                : resumeData.skills.slice(Math.ceil(resumeData.skills.length / 3), Math.ceil(2 * resumeData.skills.length / 3)).join(', ')}
+            </div>
+          </div>
+          <div class="skills-category">
+            <div class="skills-category-title">Developer Tools:</div>
+            <div class="skills-list">
+              ${resumeData.skills.filter(skill => skill.includes('Git') || skill.includes('Docker') || skill.includes('Cloud') || skill.includes('AWS') || skill.includes('Azure') || skill.includes('CI/CD') || skill.includes('Jenkins')).length > 0 
+                ? resumeData.skills.filter(skill => skill.includes('Git') || skill.includes('Docker') || skill.includes('Cloud') || skill.includes('AWS') || skill.includes('Azure') || skill.includes('CI/CD') || skill.includes('Jenkins')).join(', ')
+                : resumeData.skills.slice(Math.ceil(2 * resumeData.skills.length / 3)).join(', ')}
             </div>
           </div>
         </div>

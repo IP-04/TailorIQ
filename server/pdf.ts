@@ -12,6 +12,7 @@ export async function generatePDF(resumeData: Resume, template: ResumeTemplate):
     // Launch Puppeteer in serverless mode with more robust options
     browser = await puppeteer.launch({
       headless: true,
+      executablePath: '/nix/store/mfmnxisc1x9xc4whxmn91w9s2zy8qm9l-chromium-113.0.5672.126/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

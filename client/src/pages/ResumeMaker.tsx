@@ -5,6 +5,7 @@ import FormPanel from "@/components/FormPanel";
 import ResumeCanvas from "@/components/ResumeCanvas";
 import LLMAssistantModal from "@/components/LLMAssistantModal";
 import AIAssistantChat from "@/components/AIAssistantChat";
+import SettingsPanel from "@/components/SettingsPanel";
 import useResumeData from "@/hooks/useResumeData";
 import { ResumeTemplate } from "@shared/schema";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +13,8 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export type SectionType = 
   | "personal"
@@ -27,6 +29,7 @@ export default function ResumeMaker() {
   const [isMobilePreviewVisible, setIsMobilePreviewVisible] = useState(false);
   const [isLLMModalOpen, setIsLLMModalOpen] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [llmSuggestions, setLlmSuggestions] = useState<{
     section: string;
     title: string;
@@ -174,12 +177,17 @@ export default function ResumeMaker() {
   const toggleMobilePreview = () => {
     setIsMobilePreviewVisible(!isMobilePreviewVisible);
   };
+  
+  const handleOpenSettings = () => {
+    setIsSettingsOpen(true);
+  };
 
   return (
     <div className="flex flex-col h-screen">
       <Header 
         onDownloadPDF={handleDownloadPDF} 
         onAIAssistant={handleAIAssistant}
+        onOpenSettings={handleOpenSettings}
         isPdfLoading={generatePdfMutation.isPending}
         isLlmLoading={llmReviewMutation.isPending}
       />
