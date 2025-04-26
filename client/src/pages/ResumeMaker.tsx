@@ -248,6 +248,29 @@ export default function ResumeMaker() {
         <MessageCircle className="h-6 w-6" />
       </Button>
       
+      {/* Settings Dialog */}
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-2xl font-bold">Settings</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsSettingsOpen(false)}
+              className="rounded-full"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="overflow-y-auto h-full">
+            <SettingsPanel 
+              activeTemplate={activeTemplate}
+              onTemplateChange={setActiveTemplate}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Mobile Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3">
         <button 
